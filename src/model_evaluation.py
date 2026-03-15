@@ -1,5 +1,6 @@
 
 
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -14,14 +15,6 @@ from sklearn.metrics import (
     confusion_matrix,
     roc_curve,
 )
-
-from ft_engineering import prepare_data
-
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import GradientBoostingClassifier
-from xgboost import XGBClassifier
 
 
 # Función: summarize_classification
@@ -49,7 +42,7 @@ def summarize_classification(y_true, y_pred, y_proba, model_name: str) -> dict:
     print(f"  Modelo: {model_name}")
     print(classification_report(y_true, y_pred, target_names=["No pagó (0)", "Pagó (1)"]))
     print(f"  AUC-ROC: {auc:.4f}")
-    
+
 
     # Confusion matrix
     cm = confusion_matrix(y_true, y_pred)
@@ -87,39 +80,8 @@ def summarize_classification(y_true, y_pred, y_proba, model_name: str) -> dict:
     }
 
 
-# Función: build_model
-
-def build_model(model, X_train, y_train, X_test, y_test, model_name: str) -> tuple:
-    """
-    Entrena un modelo, genera predicciones y evalúa su desempeño.
-
-    Parámetros:
-        model:      instancia del clasificador (sin entrenar)
-        X_train:    features de entrenamiento
-        y_train:    target de entrenamiento
-        X_test:     features de evaluación
-        y_test:     target de evaluación
-        model_name: nombre descriptivo del modelo
-
-    Retorna:
-        (modelo_entrenado, dict_metricas)
-    """
-    # Entrenar
-    model.fit(X_train, y_train)
-
-    # Predecir
-    y_pred = model.predict(X_test)
-    y_proba = model.predict_proba(X_test)[:, 1]
-
-    # Evaluar
-    metrics = summarize_classification(y_test, y_pred, y_proba, model_name)
-
-    return model, metrics
-
-
-# ---------------------------------------------------------------------------
 # Función: compare_models
-# ---------------------------------------------------------------------------
+
 def compare_models(results: list[dict]) -> pd.DataFrame:
     """
     Genera gráficos comparativos y tabla resumen de todos los modelos.
@@ -136,9 +98,9 @@ def compare_models(results: list[dict]) -> pd.DataFrame:
     # --- Tabla resumen ---
 
     print("  TABLA RESUMEN DE EVALUACIÓN DE MODELOS")
-   
+
     print(df_results.to_string())
-   
+
     # --- Gráfico comparativo de barras ---
     metrics_to_plot = ["accuracy", "precision", "recall", "f1_score", "auc_roc"]
     df_plot = df_results[metrics_to_plot]
@@ -164,7 +126,7 @@ def compare_models(results: list[dict]) -> pd.DataFrame:
     plt.tight_layout()
     plt.show()
 
-    
+
     fig, ax = plt.subplots(figsize=(10, 5))
     sns.heatmap(
         df_plot,
@@ -180,7 +142,7 @@ def compare_models(results: list[dict]) -> pd.DataFrame:
     plt.tight_layout()
     plt.show()
 
-    
+
     best_model = df_results["f1_score"].idxmax()
     best_f1 = df_results.loc[best_model, "f1_score"]
     best_auc = df_results.loc[best_model, "auc_roc"]
@@ -188,74 +150,44 @@ def compare_models(results: list[dict]) -> pd.DataFrame:
     print(f"  F1-Score: {best_f1:.4f} | AUC-ROC: {best_auc:.4f}")
 
     return df_results
+
+
 # ---------------------------------------------------------------------------
 # Ejecución principal
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
+    from ft_engineering import prepare_data
+    from model_training import build_model
+
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.tree import DecisionTreeClassifier
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.ensemble import GradientBoostingClassifier
+    from xgboost import XGBClassifier
 
     # 1. Cargar datos transformados
     X_train, X_test, y_train, y_test, preprocessor = prepare_data()
 
     # 2. Definir modelos
     models = [
-
-    ("Logistic Regression",
-     LogisticRegression(
-         max_iter=1000,
-         class_weight="balanced"
-     )),
-
-    ("Decision Tree",
-     DecisionTreeClassifier(
-         random_state=42,
-         class_weight="balanced"
-     )),
-
-    ("Random Forest",
-     RandomForestClassifier(
-         n_estimators=200,
-         random_state=42,
-         class_weight="balanced"
-     )),
-
-    ("Gradient Boosting",
-     GradientBoostingClassifier(
-         n_estimators=200,
-         learning_rate=0.05,
-         max_depth=3,
-         random_state=42
-     )),
-
-    ("XGBoost",
-     XGBClassifier(
-         n_estimators=300,
-         learning_rate=0.05,
-         max_depth=4,
-         subsample=0.8,
-         colsample_bytree=0.8,
-         eval_metric="logloss",
-         random_state=42
-     )),
-]
+        ("Logistic Regression", LogisticRegression(max_iter=1000, class_weight="balanced")),
+        ("Decision Tree", DecisionTreeClassifier(random_state=42, class_weight="balanced")),
+        ("Random Forest", RandomForestClassifier(n_estimators=200, random_state=42, class_weight="balanced")),
+        ("Gradient Boosting", GradientBoostingClassifier(n_estimators=200, learning_rate=0.05, max_depth=3, random_state=42)),
+        ("XGBoost", XGBClassifier(n_estimators=300, learning_rate=0.05, max_depth=4, subsample=0.8, colsample_bytree=0.8, eval_metric="logloss", random_state=42)),
+    ]
 
     results = []
-    trained_models = {}
 
     # 3. Entrenar y evaluar modelos
     for name, model in models:
-        trained_model, metrics = build_model(
-            model,
-            X_train,
-            y_train,
-            X_test,
-            y_test,
-            name
+        trained_model, y_pred, y_proba = build_model(
+            model, X_train, y_train, X_test, y_test, name
         )
-
-        trained_models[name] = trained_model
+        metrics = summarize_classification(y_test, y_pred, y_proba, name)
         results.append(metrics)
 
     # 4. Comparar resultados
     summary = compare_models(results)
 
-    print("\nEntrenamiento y evaluación de modelos completado.")
+    print("\nEvaluación de modelos completada.")

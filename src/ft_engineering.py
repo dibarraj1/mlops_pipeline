@@ -12,12 +12,17 @@ from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 NUMERIC_FEATURES = [
     "capital_prestado", "salario_cliente", "total_otros_prestamos",
     "cuota_pactada", "puntaje_datacredito",
-    "saldo_mora", "saldo_total", "saldo_principal", "saldo_mora_codeudor",
     "promedio_ingresos_datacredito",
     "plazo_meses", "edad_cliente", "cant_creditosvigentes", "huella_consulta",
     "creditos_sectorFinanciero", "creditos_sectorCooperativo", "creditos_sectorReal",
     "ratio_cuota_salario", "ratio_deuda_salario", "ratio_capital_plazo",
 ]
+
+# Variables eliminadas por data leakage (son consecuencia del target, no predictoras):
+# - puntaje: score interno que refleja directamente el comportamiento de pago
+# - saldo_mora: saldo en mora, resultado directo de no pagar
+# - saldo_total, saldo_principal: reflejan estado post-pago
+# - saldo_mora_codeudor: mora del codeudor, indicador directo
 
 CATEGORICAL_FEATURES = ["tipo_credito", "tipo_laboral"]
 
