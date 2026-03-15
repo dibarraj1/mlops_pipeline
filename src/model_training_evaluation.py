@@ -20,6 +20,8 @@ from ft_engineering import prepare_data
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from xgboost import XGBClassifier
 
 
 # Función: summarize_classification
@@ -196,9 +198,44 @@ if __name__ == "__main__":
 
     # 2. Definir modelos
     models = [
-    ("Logistic Regression", LogisticRegression(max_iter=1000, class_weight="balanced")),
-    ("Decision Tree", DecisionTreeClassifier(random_state=42, class_weight="balanced")),
-    ("Random Forest", RandomForestClassifier(random_state=42, class_weight="balanced")),
+
+    ("Logistic Regression",
+     LogisticRegression(
+         max_iter=1000,
+         class_weight="balanced"
+     )),
+
+    ("Decision Tree",
+     DecisionTreeClassifier(
+         random_state=42,
+         class_weight="balanced"
+     )),
+
+    ("Random Forest",
+     RandomForestClassifier(
+         n_estimators=200,
+         random_state=42,
+         class_weight="balanced"
+     )),
+
+    ("Gradient Boosting",
+     GradientBoostingClassifier(
+         n_estimators=200,
+         learning_rate=0.05,
+         max_depth=3,
+         random_state=42
+     )),
+
+    ("XGBoost",
+     XGBClassifier(
+         n_estimators=300,
+         learning_rate=0.05,
+         max_depth=4,
+         subsample=0.8,
+         colsample_bytree=0.8,
+         eval_metric="logloss",
+         random_state=42
+     )),
 ]
 
     results = []
