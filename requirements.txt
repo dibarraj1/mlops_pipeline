@@ -12,4 +12,11 @@ scikit-learn
 xgboost
 pydantic
 fastapi
-uvicorn[standard].\churn_ml\Scripts\activate 
+uvicorn[standard]
+scipy
+streamlit
+plotly
+joblib
+evidently
+requests
+pydantic
