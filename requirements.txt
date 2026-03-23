@@ -19,3 +19,4 @@ plotly
 joblib
 evidently
 requests
+pydantic
