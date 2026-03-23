@@ -257,3 +257,4 @@ Se abrira automaticamente en: http://localhost:8501
 - scipy (metricas de drift)
 - evidently (reporte opcional de drift)
 - requests (comunicacion con API)
+
