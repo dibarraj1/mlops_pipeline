@@ -18,13 +18,25 @@ logger = logging.getLogger(__name__)
 FIGURES_DIR = Path("figures")
 
 
-
+# ---------------------------------------------------------------------------
 # Métricas
-
+# ---------------------------------------------------------------------------
 
 def compute_metrics(y_true, y_pred, y_proba, model_name: str) -> dict:
     """
-    
+    Calcula métricas de clasificación orientadas a riesgo crediticio.
+
+    En un dataset desbalanceado (95 % pagó / 5 % no pagó) las métricas
+    por defecto (pos_label=1) son engañosas porque la clase mayoritaria
+    infla accuracy, recall y F1.
+
+    Por eso se reportan:
+      - recall_no_pago:     qué tan bien detecta morosos  (pos_label=0)
+      - precision_no_pago:  de los marcados como morosos, cuántos lo son
+      - f1_no_pago:         balance precision/recall para morosos
+      - recall_macro:       promedio de recall de ambas clases
+      - auc_roc:            capacidad de discriminación global
+      - avg_precision:      PR-AUC, más informativa que AUC en desbalance
     """
     return {
         "model_name":        model_name,
@@ -38,8 +50,9 @@ def compute_metrics(y_true, y_pred, y_proba, model_name: str) -> dict:
     }
 
 
+# ---------------------------------------------------------------------------
 # Comparación de modelos (solo Heatmap)
-
+# ---------------------------------------------------------------------------
 
 def compare_models(results: list[dict]) -> pd.DataFrame:
     """
@@ -101,9 +114,9 @@ def compare_models(results: list[dict]) -> pd.DataFrame:
     return df_results
 
 
-
+# ---------------------------------------------------------------------------
 # Ejecución principal
-
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
